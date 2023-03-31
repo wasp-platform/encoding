@@ -1,0 +1,5 @@
+(executable
+ (public_name parser)
+ (name parser)
+ (modules parser)
+ (libraries encoding))

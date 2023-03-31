@@ -1,4 +1,5 @@
 (lang dune 3.0)
+(using menhir 2.1)
 
 (name encoding)
 
@@ -13,4 +14,4 @@
  (name encoding)
  (synopsis "Encoding library")
  (description "OCaml Z3 symbolic value encoding library")
- (depends ocaml dune base ppx_inline_tests))
+ (depends ocaml dune base menhir menhirLib ppx_inline_tests ppx_import ppx_deriving))
