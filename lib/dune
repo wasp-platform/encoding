@@ -1,4 +1,22 @@
+(include_subdirs unqualified)
+
 (library
  (name encoding)
  (public_name encoding)
- (libraries base z3))
+ (preprocess
+  (staged_pps ppx_import ppx_deriving.std))
+ (libraries base menhirLib z3))
+
+
+(subdir
+ parser
+ (rule
+  (target lexer.ml)
+  (deps lexer.mll)
+  (action
+   (chdir
+    %{workspace_root}
+    (run %{bin:ocamllex} -ml -q -o %{target} %{deps}))))
+ (menhir
+  (modules parser)
+  (flags --table)))
