@@ -9,7 +9,11 @@ depends: [
   "ocaml"
   "dune" {>= "3.0"}
   "base"
+  "menhir"
+  "menhirLib"
   "ppx_inline_tests"
+  "ppx_import"
+  "ppx_deriving"
   "odoc" {with-doc}
 ]
 build: [
