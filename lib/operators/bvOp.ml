@@ -14,10 +14,11 @@ type binop =
   | ShrS
   | Or
   | Xor
+  | Concat
 
 type unop = Not | Clz (*  Falta:  Ctz | Popcnt *)
 type relop = Eq | LtU | LtS | LeU | LeS | Ne | GtU | GtS | GeU | GeS
-type triop
+type triop = Extract
 
 type cvtop =
   | TruncSF32
@@ -58,6 +59,7 @@ let string_of_binop (op : binop) : string =
   | ShrU -> "ShrU"
   | RemS -> "RemS"
   | RemU -> "RemU"
+  | Concat -> "Concat"
 
 let pp_string_of_binop (op : binop) : string =
   match op with
@@ -74,6 +76,7 @@ let pp_string_of_binop (op : binop) : string =
   | ShrU -> ">>u"
   | RemS -> "%"
   | RemU -> "%u"
+  | Concat -> "++"
 
 (*  String representation of an i32 unary operation  *)
 let string_of_unop (op : unop) : string =
@@ -121,5 +124,5 @@ let string_of_cvtop (op : cvtop) : string =
   | ExtendUI32 -> "ExtendUI32"
 
 let pp_string_of_cvtop (op : cvtop) : string = string_of_cvtop op
-let string_of_triop (_ : triop) : string = assert false
-let pp_string_of_triop (_ : triop) : string = assert false
+let string_of_triop (op : triop) : string = match op with Extract -> "Extract"
+let pp_string_of_triop (op : triop) : string = string_of_triop op

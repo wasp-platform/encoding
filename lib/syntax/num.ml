@@ -18,7 +18,7 @@ let default_value (t : num_type) : t =
   | `F32Type -> F32 (Int32.bits_of_float 0.0)
   | `F64Type -> F64 (Int64.bits_of_float 0.0)
 
-let string_of_num (n : t) : string =
+let to_string (n : t) : string =
   match n with
   | I32 i -> Int32.to_string i
   | I64 i -> Int64.to_string i

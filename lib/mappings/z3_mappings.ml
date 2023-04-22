@@ -240,6 +240,7 @@ module I32Z3Op = struct
       | ShrU -> BitVector.mk_lshr ctx
       | RemS -> BitVector.mk_srem ctx
       | RemU -> BitVector.mk_urem ctx
+      | Concat -> BitVector.mk_concat ctx
     in
     op' e1 e2
 
@@ -307,6 +308,7 @@ module I64Z3Op = struct
       | ShrU -> BitVector.mk_lshr ctx
       | RemS -> BitVector.mk_srem ctx
       | RemU -> BitVector.mk_urem ctx
+      | Concat -> BitVector.mk_concat ctx
     in
     op' e1 e2
 
@@ -566,38 +568,38 @@ let rec encode_expr ?(bool_to_bv = false) (e : Expression.t) : Expr.expr =
       let base' = encode_num (I32 base) in
       let offset' = encode_expr offset in
       I32Z3Op.encode_binop I32.Add base' offset'
-  | Unop (op, e) ->
-      let e' = encode_expr e in
-      encode_unop op e'
-  | Binop ((Int _ as op), e1, e2) | Binop ((Bool _ as op), e1, e2) ->
+  | Unop (op, e) -> encode_unop op (encode_expr e)
+  | Cvtop (op, e) -> encode_cvtop op (encode_expr e)
+  | Binop ((Int _ as op), e1, e2)
+  | Binop ((Real _ as op), e1, e2)
+  | Binop ((Bool _ as op), e1, e2)
+  | Binop ((Str _ as op), e1, e2) ->
       let e1' = encode_expr e1 and e2' = encode_expr e2 in
       encode_binop op e1' e2'
   | Binop (op, e1, e2) ->
       let e1' = encode_expr ~bool_to_bv:true e1
       and e2' = encode_expr ~bool_to_bv:true e2 in
       encode_binop op e1' e2'
-  | Triop (op, e1, e2, e3) ->
-      let e1' = encode_expr ~bool_to_bv e1
-      and e2' = encode_expr ~bool_to_bv e2
-      and e3' = encode_expr ~bool_to_bv e3 in
-      encode_triop op e1' e2' e3'
-  | Relop ((Int _ as op), e1, e2) | Relop ((Bool _ as op), e1, e2) ->
+  | Relop ((Int _ as op), e1, e2)
+  | Relop ((Real _ as op), e1, e2)
+  | Relop ((Bool _ as op), e1, e2)
+  | Relop ((Str _ as op), e1, e2) ->
       let e1' = encode_expr e1 and e2' = encode_expr e2 in
       encode_relop ~to_bv:false op e1' e2'
   | Relop (op, e1, e2) ->
       let e1' = encode_expr ~bool_to_bv:true e1
       and e2' = encode_expr ~bool_to_bv:true e2 in
       encode_relop ~to_bv:bool_to_bv op e1' e2'
-  | Cvtop (op, e) ->
-      let e' = encode_expr e in
-      encode_cvtop op e'
-  | Symbolic (t, x) -> Expr.mk_const_s ctx x (get_sort t)
-  | Extract (e, h, l) ->
-      let e' = encode_expr ~bool_to_bv:true e in
-      BitVector.mk_extract ctx ((h * 8) - 1) (l * 8) e'
-  | Concat (e1, e2) ->
-      let e1' = encode_expr e1 and e2' = encode_expr e2 in
-      BitVector.mk_concat ctx e1' e2'
+  | Triop (I32 Extract, e, Val (Int h), Val (Int l))
+  | Triop (I64 Extract, e, Val (Int h), Val (Int l)) ->
+      BitVector.mk_extract ctx ((h * 8) - 1) (l * 8)
+        (encode_expr ~bool_to_bv:true e)
+  | Triop (op, e1, e2, e3) ->
+      let e1' = encode_expr ~bool_to_bv e1
+      and e2' = encode_expr ~bool_to_bv e2
+      and e3' = encode_expr ~bool_to_bv e3 in
+      encode_triop op e1' e2' e3'
+  | Symbol (t, x) -> Expr.mk_const_s ctx x (get_sort t)
   | Quantifier (t, vars, body, patterns) ->
       let body' = encode_expr body in
       let encode_pattern p =
@@ -683,7 +685,7 @@ let value_of_const (model : Model.model) (c : Expression.t) :
 let model_binds (model : Model.model) (vars : (string * expr_type) list) :
     (string * Expression.value) list =
   List.fold_left vars ~init:[] ~f:(fun a (x, t) ->
-      let v = value_of_const model (Expression.mk_symbolic t x) in
+      let v = value_of_const model (Expression.mk_symbol t x) in
       Option.fold ~init:a ~f:(fun a v' -> (x, v') :: a) v)
 
 let value_binds (model : Model.model) (vars : (string * expr_type) list) :

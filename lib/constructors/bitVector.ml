@@ -247,3 +247,24 @@ let mk_ge_s (e1 : expr) (e2 : expr) (t : num_type) : expr =
         raise (Error ("mk_ge_s: invalid type '" ^ string_of_num_type t ^ "'"))
   in
   Relop (op, e1, e2)
+
+let mk_concat (e1 : expr) (e2 : expr) (t : num_type) : expr =
+  let op =
+    match t with
+    | `I32Type -> I32 I32.Concat
+    | `I64Type -> I64 I64.Concat
+    | _ ->
+        raise (Error ("mk_concat: invalid type '" ^ string_of_num_type t ^ "'"))
+  in
+  Binop (op, e1, e2)
+
+let mk_extract (e : expr) (h : expr) (l : expr) (t : num_type) : expr =
+  let op =
+    match t with
+    | `I32Type -> I32 I32.Extract
+    | `I64Type -> I64 I64.Extract
+    | _ ->
+        raise
+          (Error ("mk_extract: invalid type '" ^ string_of_num_type t ^ "'"))
+  in
+  Triop (op, e, h, l)

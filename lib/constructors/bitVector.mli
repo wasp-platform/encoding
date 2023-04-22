@@ -80,3 +80,9 @@ val mk_ge_u : expr -> expr -> num_type -> expr
 
 val mk_ge_s : expr -> expr -> num_type -> expr
 (** [mk_ge_s i1 i2] create an expression representing signed [i1 >= i2]. *)
+
+val mk_concat : expr -> expr -> num_type -> expr
+(** [mk_extract i1 i2] create an expression representing [i1 ++ i2]. *)
+
+val mk_extract : expr -> expr -> expr -> num_type -> expr
+(** [mk_extract i h l] create an expression representing [i[l:h]]. *)
