@@ -77,3 +77,14 @@ let string_of_type (t : expr_type) : string =
   | `IntType -> "IntType"
   | `BoolType -> "BoolType"
   | `StrType -> "StrType"
+
+let type_of_string (t : String.t) : expr_type =
+  match t with
+  | "int" -> `IntType
+  | "bool" -> `BoolType
+  | "str" -> `StrType
+  | "i32" -> `I32Type
+  | "i64" -> `I64Type
+  | "f32" -> `F32Type
+  | "f64" -> `F64Type
+  | _ -> `IntType

@@ -4,6 +4,8 @@ open Types
 
 exception Error of string
 
+let global = ref []
+
 let ctx =
   Z3.mk_context
     [ ("model", "true"); ("proof", "false"); ("unsat_core", "false") ]
@@ -59,8 +61,8 @@ module IntZ3Op = struct
       match op with
       | Eq -> Boolean.mk_eq ctx
       | Ne -> fun v1 v2 -> Boolean.mk_eq ctx v1 v2 |> Boolean.mk_not ctx
-      | Lt -> Arithmetic.mk_lt ctx
-      | Gt -> Arithmetic.mk_gt ctx
+      | Lt -> global := "LT \n" :: !global ; Arithmetic.mk_lt ctx
+      | Gt -> global := "GT \n" :: !global ; Arithmetic.mk_gt ctx
       | Le -> Arithmetic.mk_le ctx
       | Ge -> Arithmetic.mk_ge ctx
     in
@@ -81,7 +83,7 @@ module BoolZ3Op = struct
   let encode_binop (op : binop) (e1 : Expr.expr) (e2 : Expr.expr) : Expr.expr =
     let op' =
       match op with
-      | And -> fun v1 v2 -> Boolean.mk_and ctx [ v1; v2 ]
+      | And -> fun v1 v2 -> global := "Boolean.And \n" :: !global ; Boolean.mk_and ctx [ v1; v2 ]
       | Or -> fun v1 v2 -> Boolean.mk_or ctx [ v1; v2 ]
       | Xor -> Boolean.mk_xor ctx
     in
@@ -438,7 +440,7 @@ let rec encode_expr ?(bool_to_bv = false) (e : Expression.t) : Expr.expr =
   | Cvtop (op, e) ->
       let e' = encode_expr e in
       encode_cvtop op e'
-  | Symbolic (t, x) -> Expr.mk_const_s ctx x (get_sort t)
+  | Symbolic (t, x) -> global := (Printf.sprintf "Symbolic %s \n" x) :: !global; Expr.mk_const_s ctx x (get_sort t)
   | Extract (e, h, l) ->
       let e' = encode_expr ~bool_to_bv:true e in
       BitVector.mk_extract ctx ((h * 8) - 1) (l * 8) e'
