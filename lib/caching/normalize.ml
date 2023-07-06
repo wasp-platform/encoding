@@ -1,4 +1,5 @@
 open Types
+open Expression
 
 let new_var (i : int) (t : expr_type) : string =
   "__x" ^ (string_of_int i) ^ "_" ^ string_of_type t
@@ -19,14 +20,10 @@ let normalize_relop (op : relop) (e1 : Expression.t) (e2: Expression.t) : Expres
     (match iop with 
     | Gt -> 
       (* e1 > e2 -> e2 < e1 -> -e1 + e2 + 1 <= 0 *)
-      let e' = Expression.Binop(Int Add, e2, Val (Int 1)) in
-      let e'' = Expression.Binop(Int Sub, e', e1) in
-      Relop (Int Le, e'', Val (Int 0));
+      IntInfix.(((neg e1) + e2 + (const 1)) <= (const 0))
     | Lt -> 
       (* e1 < e2 -> e1 - e2 < 0 -> e1 - e2 + 1 <= 0 *)
-      let e' = Expression.Binop(Int Add, e2, Val (Int 1)) in
-      let e'' = Expression.Binop(Int Sub, e1, e') in
-      Relop (Int Le, e'', Val (Int 0));
+      IntInfix.((e1 - e2 + (const 1)) <= (const 0))
     | Ge -> 
       (* e1 >= e2 -> e1 - e2 <= 0 *)
       let e' = Expression.Binop(Int Sub, e1, e2) in

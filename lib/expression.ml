@@ -19,6 +19,28 @@ type expr =
 type t = expr
 type pc = expr List.t
 
+module IntInfix = struct 
+  let (+) e1 e2  = Binop (Int Add, e1, e2) 
+
+  let (-) e1 e2 = Binop (Int Sub, e1, e2)
+
+  let ( * ) e1 e2 = Binop (Int Mul, e1, e2)
+  
+  let ( / ) e1 e2 = Binop (Int Div, e1, e2)
+
+  let (<) e1 e2 = Relop (Int Lt, e1, e2)
+
+  let (>) e1 e2 = Relop (Int Gt, e1, e2)
+
+  let (<=) e1 e2 = Relop (Int Le, e1, e2)
+
+  let (>=) e1 e2 = Relop (Int Ge, e1, e2)
+
+  let neg e = Unop (Int Neg, e)
+  
+  let const i = Val (Int i)
+end 
+
 let ( ++ ) (e1 : expr) (e2 : expr) = Concat (e1, e2)
 let symbolic (t : expr_type) (x : String.t) : expr = Symbolic (t, x)
 
